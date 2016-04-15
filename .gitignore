@@ -27,10 +27,3 @@ Pods/
 .DS_Store
 .svn/
 xcuserdata/
-build/
-fastlane/report.xml
-fastlane/Preview.html
-fastlane/screenshots
-fastlane/test_output
-iOSInjectionProject/
-culprits.txt
