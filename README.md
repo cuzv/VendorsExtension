@@ -9,4 +9,5 @@ The extension utils code for swift on app development.
 - pod 'Toucan'
 - pod 'SnapKit'
 - pod 'ReactiveCocoa', '~> 4.1.0'
+- [ExtensionKit](https://github.com/cuzv/ExtensionKit)
 
