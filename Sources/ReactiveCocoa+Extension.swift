@@ -384,24 +384,11 @@ public extension UIControl {
 private extension Redes.Request {
     var asyncProducer: SignalProducer <AnyObject, NSError>  {
         return SignalProducer { observer, disposable in
-            self.asyncResponseJSON({
-                switch $0 {
-                case let .Success(_, value):
-                    observer.sendNext(value)
-                    observer.sendCompleted()
-                case let .Failure(_, error):
-                    observer.sendFailed(error)
+            UIApplication.sharedApplication().networkActivityIndicatorVisible = true
+            self.asyncResponseJSON {
+                dispatch_async(dispatch_get_main_queue()) {
+                    UIApplication.sharedApplication().networkActivityIndicatorVisible = false
                 }
-            })
-            disposable.addDisposable({
-                self.cancel()
-            })
-        }
-    }
-    
-    var producer: SignalProducer <AnyObject, NSError>  {
-        return SignalProducer { observer, disposable in
-            self.responseJSON {
                 switch $0 {
                 case let .Success(_, value):
                     observer.sendNext(value)
@@ -410,9 +397,28 @@ private extension Redes.Request {
                     observer.sendFailed(error)
                 }
             }
-            disposable.addDisposable({
-                self.cancel()
-            })
+            disposable.addDisposable { [weak self] in
+                self?.cancel()
+            }
+        }
+    }
+    
+    var producer: SignalProducer <AnyObject, NSError>  {
+        return SignalProducer { observer, disposable in
+            UIApplication.sharedApplication().networkActivityIndicatorVisible = true
+            self.responseJSON {
+                UIApplication.sharedApplication().networkActivityIndicatorVisible = false
+                switch $0 {
+                case let .Success(_, value):
+                    observer.sendNext(value)
+                    observer.sendCompleted()
+                case let .Failure(_, error):
+                    observer.sendFailed(error)
+                }
+            }
+            disposable.addDisposable {  [weak self] in
+                self?.cancel()
+            }
         }
     }
 }
