@@ -116,6 +116,14 @@ final public class SegmentedToggleControl: UIControl {
 
 public extension SegmentedToggleControl {
     private func setup() {
+        let blurBackgroundView = UIToolbar(frame: CGRectZero)
+        blurBackgroundView.barStyle = .Default
+        blurBackgroundView.translucent = true
+        addSubview(blurBackgroundView)
+        blurBackgroundView.snp_makeConstraints { (make) in
+            make.edges.equalTo(self)
+        }
+        
         var lastButton: UIButton!
         let count = items.count
         for i in 0 ..< count {
@@ -126,7 +134,8 @@ public extension SegmentedToggleControl {
             button.title = items[i]
             button.setTitleColor(normalTextColor, forState: .Normal)
             button.setTitleColor(selectedTextColor, forState: .Selected)
-            button.tintColor = UIColor.whiteColor()
+            button.tintColor = UIColor.clearColor()
+            button.backgroundColor = UIColor.clearColor()
             addSubview(button)
             
             // Set position
