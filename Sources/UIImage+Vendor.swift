@@ -94,6 +94,7 @@ public extension UIImageView {
     /// Set ellipse image with a URLPath, a optional placeholder image, optional border width, optional border color.
     public func setEllipseImage(
         withURLPath URLPath: String!,
+                    resize: CGSize,
         placeholderImage: UIImage? = nil,
         borderWidth: CGFloat = 0,
         borderColor: UIColor = UIColor.whiteColor())
@@ -102,7 +103,7 @@ public extension UIImageView {
             [weak self] (image, error, imageURL) -> Void in
             
             guard let this = self else { return }
-            this.image = image?.maskWithEllipse(borderWidth: borderWidth, borderColor: borderColor)
+            this.image = image?.cropResize(resize).maskWithEllipse(borderWidth: borderWidth, borderColor: borderColor)
         }
     }
     
