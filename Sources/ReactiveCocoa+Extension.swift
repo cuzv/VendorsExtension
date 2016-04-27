@@ -59,7 +59,7 @@ public extension SignalProducer {
             } else if let globalDataMetric = value as? TCGlobalDataMetric {
                 return !globalDataMetric.isEmpty
             } else if let error = value as? NSError {
-                return !(error.code == NSError.defaultErrorCode && error.domain == NSError.defaultErrorDomain)
+                return !(error.code == NSError.emptyErrorCode && error.domain == NSError.emptyErrorDomain)
             }
             return true
         }
@@ -84,7 +84,7 @@ public func merge<Value, Error: ErrorType>(signals: [Signal<Value, Error>]) -> S
 }
 
 public func mergeErrors(errors: [Signal<NSError, NoError>]) -> MutableProperty<NSError> {
-    return merge(errors).rac_next(NSError.defaultError())
+    return merge(errors).rac_next(NSError.empty())
 }
 
 public func mergeActionsErrors<Input, Output>(actions: [ReactiveCocoa.Action<Input, Output, NSError>]) -> MutableProperty<NSError> {
