@@ -27,8 +27,9 @@
 import UIKit
 import ReactiveCocoa
 import enum Result.NoError
-
 import Redes
+import TinyCoordinator
+import ExtensionKit
 
 // MARK: - SignalProducer
 
@@ -47,6 +48,21 @@ public extension SignalProducer {
     
     public func filterNil() -> SignalProducer<Value, Error> {
         return filter { $0 != nil}
+    }
+    
+    public func filterEmpty() -> SignalProducer<Value, Error> {
+        return filter { (value: Value) -> Bool in
+            if let arr = value as? [AnyObject] {
+                return !arr.isEmpty
+            } else if let dict = value as? [String: AnyObject] {
+                return !dict.isEmpty
+            } else if let globalDataMetric = value as? TCGlobalDataMetric {
+                return !globalDataMetric.isEmpty
+            } else if let error = value as? NSError {
+                return !(error.code == NSError.defaultErrorCode && error.domain == NSError.defaultErrorDomain)
+            }
+            return true
+        }
     }
 }
 
