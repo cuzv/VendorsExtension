@@ -432,10 +432,55 @@ private extension Redes.Request {
                     observer.sendFailed(error)
                 }
             }
-            disposable.addDisposable {  [weak self] in
+            disposable.addDisposable { [weak self] in
                 self?.cancel()
             }
         }
+    }
+}
+
+public extension Redes.BatchRequest {
+//    public var asyncProducer: SignalProducer <[AnyObject], NSError> {
+//        return SignalProducer { observer, disposable in
+//            self.asyncResponseJSON { (results: [Result<Response, AnyObject, NSError>]) in
+//                let allSuccessed = results.reduce(true, combine: { (lastSuccessed, result: Result<Response, AnyObject, NSError>) -> Bool in
+//                    return lastSuccessed && result.isSuccess
+//                })
+//                if allSuccessed {
+//                    let values = results.map { (result: Result<Response, AnyObject, NSError>) -> AnyObject in
+//                        return result.value!
+//                    }
+//                    observer.sendNext(values)
+//                    observer.sendCompleted()
+//                } else {
+//                    for result in results {
+//                        if result.isFailure {
+//                            observer.sendFailed(result.error!)
+//                            break
+//                        }
+//                    }
+//                }
+//            }
+//            disposable.addDisposable {  [weak self] in
+//                self?.requests.forEach { (req: Request) in
+//                    req.cancel()
+//                }
+//            }
+//        }
+//    }
+    
+    public var asyncProducer: SignalProducer<[AnyObject], NSError> {
+        let producers = requests.map { (req: Request) -> SignalProducer<AnyObject, NSError> in
+            return req.asyncProducer
+        }
+        return combineLatest(producers)
+    }
+    
+    public var producer: SignalProducer<[AnyObject], NSError> {
+        let producers = requests.map { (req: Request) -> SignalProducer<AnyObject, NSError> in
+            return req.producer
+        }
+        return combineLatest(producers)
     }
 }
 

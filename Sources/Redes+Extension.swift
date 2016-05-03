@@ -38,9 +38,19 @@ public extension Redes.Request  {
     }
 }
 
+public extension Redes.BatchRequest {
+    public func asyncResponseJSON(completionHandler: [Result<Response, AnyObject, NSError>] -> ())
+        -> Self
+    {
+        responseJSON(queue: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), completionHandler: completionHandler)
+        return self
+    }
+}
+
+
 // MARK: - Convenience request & response
 
-extension Requestable where Self: Responseable {
+public extension Requestable where Self: Responseable {
     public func asyncResponseJSON(completionHandler: Result<Response, AnyObject, NSError> -> ()) -> Request {
         return Redes.request(self).asyncResponseJSON(completionHandler)
     }
