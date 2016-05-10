@@ -119,6 +119,7 @@ public extension SegmentedToggleControl {
         let blurBackgroundView = UIToolbar(frame: CGRectZero)
         blurBackgroundView.barStyle = .Default
         blurBackgroundView.translucent = true
+        blurBackgroundView.clipsToBounds = true
         addSubview(blurBackgroundView)
         blurBackgroundView.snp_makeConstraints { (make) in
             make.edges.equalTo(self)
