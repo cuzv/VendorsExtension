@@ -95,6 +95,14 @@ public func mergeActionsErrors<Input, Output>(actions: [ReactiveCocoa.Action<Inp
     return mergeErrors(actions.map { $0.errors })
 }
 
+public func mergeValues<Output>(values: [Signal<Output, NoError>], initialValue: Output) -> MutableProperty<Output> {
+    return merge(values).rac_next(initialValue)
+}
+
+public func mergeActionsValues<Input, Output>(actions: [ReactiveCocoa.Action<Input, Output, NSError>], initialValue: Output) -> MutableProperty<Output> {
+    return mergeValues(actions.map( { $0.values }), initialValue: initialValue)
+}
+
 public func mergeExecuting(executings: [AnyProperty<Bool>]) -> AnyProperty<Bool> {
     return AnyProperty(initialValue: false, producer: merge(executings.map { $0.producer }))
 }
