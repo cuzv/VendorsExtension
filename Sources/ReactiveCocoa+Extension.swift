@@ -46,6 +46,10 @@ public extension SignalProducer {
         return skip(1)
     }
     
+    public func takeOnce() -> SignalProducer<Value, Error> {
+        return take(1)
+    }
+    
     public func filterNil() -> SignalProducer<Value, Error> {
         return filter { $0 != nil}
     }
@@ -222,7 +226,7 @@ public extension UILabel {
 public extension UISegmentedControl {
     public var rac_index: MutableProperty<Int> {
         return lazyAssociatedProperty(host: self, key: &AssociationKey.index) {
-            self.addTarget(self, action: #selector(UITextField.changed), forControlEvents: .ValueChanged)
+            self.addTarget(self, action: #selector(UISegmentedControl.changed), forControlEvents: .ValueChanged)
             
             let property = MutableProperty<Int>(0)
             property.producer.startWithNext{ newValue in
