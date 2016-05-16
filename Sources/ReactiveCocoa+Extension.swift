@@ -431,6 +431,22 @@ private extension Redes.Request {
         }
     }
     
+    var asyncDownloadProducer: SignalProducer <NSURL, NSError> {
+        return SignalProducer { observer, disposable in
+            self.response(queue: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) { (req: NSURLRequest?, resp: NSHTTPURLResponse?, data: NSData?, error: NSError?) in
+                if let suggestedDestination = resp?.suggestedDestination where nil == error {
+                    observer.sendNext(suggestedDestination)
+                    observer.sendCompleted()
+                } else {
+                    observer.sendFailed(error!)
+                }
+            }
+            disposable.addDisposable { [weak self] in
+                self?.cancel()
+            }
+        }
+    }
+    
     var producer: SignalProducer <AnyObject, NSError>  {
         return SignalProducer { observer, disposable in
             UIApplication.sharedApplication().networkActivityIndicatorVisible = true
@@ -484,6 +500,13 @@ public extension Redes.BatchRequest {
     public var asyncProducer: SignalProducer<[AnyObject], NSError> {
         let producers = requests.map { (req: Request) -> SignalProducer<AnyObject, NSError> in
             return req.asyncProducer
+        }
+        return combineLatest(producers)
+    }
+    
+    public var asyncDownloadProducer: SignalProducer<[NSURL], NSError> {
+        let producers = requests.map { (req: Request) -> SignalProducer<NSURL, NSError> in
+            return req.asyncDownloadProducer
         }
         return combineLatest(producers)
     }
