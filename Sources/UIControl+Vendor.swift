@@ -89,7 +89,7 @@ final public class SegmentedToggleControl: UIControl {
             return "\(str1)\(str2)"
         }
         if let font = font {
-            var size = str.size(withFont: font)
+            var size = str.sizeFrom(font: font)
             size.width += CGFloat(items.count * 12)
             size.height = size.height >= 44 ? size.height : 44
             return size
@@ -222,7 +222,7 @@ public extension SegmentedToggleControl {
     
     private func lineViewWidthForIndex(index: Int) -> CGFloat {
         if autoComputeLineWidth {
-            return items[index].size(withFont: font).width
+            return items[index].sizeFrom(font: font).width
         } else {
             return (CGRectGetWidth(bounds) / CGFloat(items.count)).ceilly
         }
@@ -241,7 +241,7 @@ public extension SegmentedToggleControl {
         button.title = title
         button.image = nil
         
-        items.replaceElementAt(index: segment, withElement: title)
+        items.replace(atIndex: segment, with: title)
         remakeLineViewConstraintsForIndex(segment)
     }
     
