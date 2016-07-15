@@ -279,25 +279,30 @@ public extension UITextView {
     }
     
     public var rac_text: MutableProperty<String> {
-        return lazyAssociatedProperty(host: self, key: &AssociationKey.text) {
-            NSNotificationCenter.defaultCenter()
-                .rac_notifications(UITextViewTextDidChangeNotification, object: self)
-                .takeUntil(self.rac_willDeinitProducer)
-                .startWithNext({ [weak self] (notification) -> () in
-                    self?.changed()
-                })
-            
-            let property = MutableProperty<String>(self.text ?? "")
-            property.producer.startWithNext { newValue in
-                self.text = newValue
-            }
-            return property
-        }
+        return rac_textSignalProducer().rac_values(text ?? "")
     }
     
-    dynamic internal func changed() {
-        rac_text.value = text ?? ""
-    }
+    // 中文输入出现问题
+//    public var rac_text: MutableProperty<String> {
+//        return lazyAssociatedProperty(host: self, key: &AssociationKey.text) {
+//            NSNotificationCenter.defaultCenter()
+//                .rac_notifications(UITextViewTextDidChangeNotification, object: self)
+//                .takeUntil(self.rac_willDeinitProducer)
+//                .startWithNext({ [weak self] (notification) -> () in
+//                    self?.changed()
+//                })
+//            
+//            let property = MutableProperty<String>(self.text ?? "")
+//            property.producer.startWithNext { newValue in
+//                self.text = newValue
+//            }
+//            return property
+//        }
+//    }
+//    
+//    dynamic internal func changed() {
+//        rac_text.value = text ?? ""
+//    }
 }
 
 public extension UISearchBar {
