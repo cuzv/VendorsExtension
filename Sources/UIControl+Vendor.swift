@@ -207,7 +207,7 @@ public extension SegmentedToggleControl {
         })
         
         let duration: NSTimeInterval = fabs(Double(lastSelectedIndex - index)) * 0.1
-        if duration <= 0 {
+        if duration <= 0 || nil == window {
             setNeedsLayout()
             layoutIfNeeded()
         } else {
