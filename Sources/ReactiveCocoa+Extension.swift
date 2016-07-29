@@ -532,4 +532,8 @@ public extension Requestable where Self: Responseable {
     public var producer: SignalProducer <AnyObject, NSError>  {
         return Redes.request(self).producer
     }
+    
+    public var asyncDownloadProducer: SignalProducer <NSURL, NSError> {
+        return Redes.request(self).asyncDownloadProducer
+    }
 }
