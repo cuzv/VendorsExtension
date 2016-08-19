@@ -165,4 +165,9 @@ public extension UIImageView {
             completionHandler?(image: image, error: error, imageURL: imageURL)
         }
     }
+    
+    public func setImageNoAnimation(withURLPath URLPath: String?) {
+        guard let URLPath = URLPath, URL = NSURL(string: URLPath) else { return }
+        kf_setImageWithURL(URL)
+    }
 }
