@@ -257,20 +257,25 @@ public extension UITextField {
     }
     
     public var rac_text: MutableProperty<String> {
-        return lazyAssociatedProperty(host: self, key: &AssociationKey.text) {
-            self.addTarget(self, action: #selector(UITextField.changed), forControlEvents: .EditingChanged)
-            
-            let property = MutableProperty<String>(self.text ?? "")
-            property.producer.startWithNext { newValue in
-                self.text = newValue
-            }
-            return property
-        }
+        return rac_textSignalProducer().rac_values(text ?? "")
     }
     
-    dynamic internal func changed() {
-        rac_text.value = text ?? ""
-    }
+    // 中文输入出现问题
+//    public var rac_text: MutableProperty<String> {
+//        return lazyAssociatedProperty(host: self, key: &AssociationKey.text) {
+//            self.addTarget(self, action: #selector(UITextField.changed), forControlEvents: .EditingChanged)
+//            
+//            let property = MutableProperty<String>(self.text ?? "")
+//            property.producer.startWithNext { newValue in
+//                self.text = newValue
+//            }
+//            return property
+//        }
+//    }
+//    
+//    dynamic internal func changed() {
+//        rac_text.value = text ?? ""
+//    }
 }
 
 public extension UITextView {
@@ -306,25 +311,34 @@ public extension UITextView {
 }
 
 public extension UISearchBar {
-    public var rac_text: MutableProperty<String> {
-        return lazyAssociatedProperty(host: self, key: &AssociationKey.text) {
-            self.rac_signalForSelector(NSSelectorFromString("searchBar:textDidChange:"), fromProtocol: NSProtocolFromString("UISearchBarDelegate"))
-                .toSignalProducer()
-                .startWithNext{ [weak self] (obj) -> () in
-                    self?.changed()
-                }
-            
-            let property = MutableProperty<String>(self.text ?? "")
-            property.producer.startWithNext { newValue in
-                self.text = newValue
-            }
-            return property
-        }
+    public func rac_textSignalProducer() -> SignalProducer<String, NoError> {
+        return rac_textSignal().toSignalProducer().map{ $0 as! String }.ignoreError()
     }
     
-    dynamic internal func changed() {
-        rac_text.value = text ?? ""
+    public var rac_text: MutableProperty<String> {
+        return rac_textSignalProducer().rac_values(text ?? "")
     }
+    
+    // 中文输入问题
+//    public var rac_text: MutableProperty<String> {
+//        return lazyAssociatedProperty(host: self, key: &AssociationKey.text) {
+//            self.rac_signalForSelector(NSSelectorFromString("searchBar:textDidChange:"), fromProtocol: NSProtocolFromString("UISearchBarDelegate"))
+//                .toSignalProducer()
+//                .startWithNext{ [weak self] (obj) -> () in
+//                    self?.changed()
+//                }
+//            
+//            let property = MutableProperty<String>(self.text ?? "")
+//            property.producer.startWithNext { newValue in
+//                self.text = newValue
+//            }
+//            return property
+//        }
+//    }
+//    
+//    dynamic internal func changed() {
+//        rac_text.value = text ?? ""
+//    }
     
 }
 
