@@ -431,11 +431,7 @@ public extension UIControl {
 private extension Redes.Request {
     var asyncProducer: SignalProducer <AnyObject, NSError>  {
         return SignalProducer { observer, disposable in
-            UIApplication.sharedApplication().networkActivityIndicatorVisible = true
             self.asyncResponseJSON {
-                dispatch_async(dispatch_get_main_queue()) {
-                    UIApplication.sharedApplication().networkActivityIndicatorVisible = false
-                }
                 switch $0 {
                 case let .Success(_, value):
                     observer.sendNext(value)
@@ -468,9 +464,7 @@ private extension Redes.Request {
     
     var producer: SignalProducer <AnyObject, NSError>  {
         return SignalProducer { observer, disposable in
-            UIApplication.sharedApplication().networkActivityIndicatorVisible = true
             self.responseJSON {
-                UIApplication.sharedApplication().networkActivityIndicatorVisible = false
                 switch $0 {
                 case let .Success(_, value):
                     observer.sendNext(value)
