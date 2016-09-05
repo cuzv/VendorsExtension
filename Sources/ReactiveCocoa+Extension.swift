@@ -27,6 +27,7 @@
 import UIKit
 import ReactiveCocoa
 import enum Result.NoError
+import enum Result.Result
 import Redes
 import TinyCoordinator
 import ExtensionKit
@@ -364,11 +365,31 @@ public extension UIButton {
     }
 }
 
+public extension SignalProducerType {
+    public func startWithTradNext(next: Self.Value -> Void) -> Disposable {
+        return startWithResult { (result: Result<Self.Value, Self.Error>) in
+            if case .Success(let value) = result {
+                next(value)
+            }
+        }
+    }
+}
+
+public extension SignalType {
+    public func observeTradNext(next: Self.Value -> Void) -> Disposable? {
+        return observeResult { (result: Result<Self.Value, Self.Error>) in
+            if case .Success(let value) = result {
+                next(value)
+            }
+        }
+    }
+}
+
 public extension SignalProducer {
     public func rac_values(initialValue: Value) -> MutableProperty<Value> {
         let property = MutableProperty<Value>(initialValue)
         
-        startWithNext { (value) -> () in
+        startWithTradNext { (value) -> () in
             property.value = value
         }
         
@@ -390,7 +411,7 @@ public extension Signal {
     public func rac_next(initialValue: Value) -> MutableProperty<Value> {
         let property = MutableProperty<Value>(initialValue)
         
-        observeNext { (value) -> () in
+        observeTradNext { (value) -> () in
             property.value = value
         }
         
