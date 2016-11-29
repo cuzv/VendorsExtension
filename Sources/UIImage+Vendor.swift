@@ -30,25 +30,25 @@ import Toucan
 
 public extension UIImage {
     /// Crop will resize to fit one dimension, then crop the other.
-    public func cropResize(size: CGSize) -> UIImage {
+    public func cropResize(_ size: CGSize) -> UIImage {
         return Toucan(image: self).resize(size, fitMode: Toucan.Resize.FitMode.Crop).image
     }
     
     /// Clip will resize so one dimension is equal to the size, the other shrunk down to retain aspect ratio.
-    public func clipResize(size: CGSize) -> UIImage {
+    public func clipResize(_ size: CGSize) -> UIImage {
         return Toucan(image: self).resize(size, fitMode: Toucan.Resize.FitMode.Clip).image
     }
     
     /// Scale will resize so the image fits exactly, altering the aspect ratio.
-    public func scaleResize(size: CGSize) -> UIImage {
+    public func scaleResize(_ size: CGSize) -> UIImage {
         return Toucan(image: self).resize(size, fitMode: Toucan.Resize.FitMode.Scale).image
     }
     
     /// Demonstrate creating a circular mask -> resizes to a square image then mask with an ellipse.
     /// Mask with borders too!
     public func maskWithEllipse(
-        borderWidth borderWidth: CGFloat = 0,
-        borderColor: UIColor = UIColor.whiteColor()) -> UIImage
+        borderWidth: CGFloat = 0,
+        borderColor: UIColor = UIColor.white) -> UIImage
     {
         return Toucan(image: self).maskWithEllipse(borderWidth: borderWidth, borderColor: borderColor).image
     }
@@ -56,15 +56,15 @@ public extension UIImage {
     /// Rounded Rects are all in style.
     /// And can be fancy with borders.
     public func maskWithRoundedRect(
-        cornerRadius cornerRadius: CGFloat,
+        cornerRadius: CGFloat,
         borderWidth: CGFloat = 0,
-        borderColor: UIColor = UIColor.whiteColor()) -> UIImage
+        borderColor: UIColor = UIColor.white) -> UIImage
     {
         return Toucan(image: self).maskWithRoundedRect(cornerRadius: cornerRadius, borderWidth: borderWidth, borderColor: borderColor).image
     }
     
     /// Masking with an custom image mask.
-    public func maskWithImage(maskImage: UIImage)  -> UIImage {
+    public func maskWithImage(_ maskImage: UIImage)  -> UIImage {
         return Toucan(image: self).maskWithImage(maskImage: maskImage).image
     }
 }
@@ -97,7 +97,7 @@ public extension UIImageView {
                     resize: CGSize,
         placeholderImage: UIImage? = nil,
         borderWidth: CGFloat = 0,
-        borderColor: UIColor = UIColor.whiteColor())
+        borderColor: UIColor = UIColor.white)
     {
         setImage(withURLPath: URLPath, placeholderImage: placeholderImage) {
             [weak self] (image, error, imageURL) -> Void in
@@ -113,7 +113,7 @@ public extension UIImageView {
         placeholderImage: UIImage? = nil,
         cornerRadius: CGFloat = 5,
         borderWidth: CGFloat = 0,
-        borderColor: UIColor = UIColor.whiteColor())
+        borderColor: UIColor = UIColor.white)
     {
         setImage(withURLPath: URLPath, placeholderImage: placeholderImage) {
             [weak self] (image, error, imageURL) -> Void in
@@ -143,13 +143,13 @@ public extension UIImageView {
     public func setImage(
         withURLPath URLPath: String!,
         placeholderImage: UIImage? = nil,
-        reduceSize: (image: UIImage?, size: CGSize) -> UIImage?)
+        reduceSize: @escaping (_ image: UIImage?, _ size: CGSize) -> UIImage?)
     {
         setImage(withURLPath: URLPath, placeholderImage: placeholderImage) {
             [weak self] (image, error, imageURL) -> Void in
             
             guard let this = self else { return }
-            this.image = reduceSize(image: image, size: this.bounds.size)
+            this.image = reduceSize(image, this.bounds.size)
         }
     }
     
@@ -157,17 +157,17 @@ public extension UIImageView {
     public func setImage(
         withURLPath URLPath: String!,
         placeholderImage: UIImage? = nil,
-        progressBlock: ((receivedSize: Int64, totalSize: Int64) -> Void)? = nil,
-        completionHandler: ((image: UIImage?, error: NSError?, imageURL: NSURL?) -> Void)? = nil)
+        progressBlock: ((_ receivedSize: Int64, _ totalSize: Int64) -> Void)? = nil,
+        completionHandler: ((_ image: UIImage?, _ error: NSError?, _ imageURL: URL?) -> Void)? = nil)
     {
-        guard let URLPath = URLPath, URL = NSURL(string: URLPath) else { return }
+        guard let URLPath = URLPath, let URL = URL(string: URLPath) else { return }
         kf_setImageWithURL(URL, placeholderImage: placeholderImage, optionsInfo: [.Transition(ImageTransition.Fade(0.5))], progressBlock: progressBlock) { (image, error, cacheType, imageURL) -> () in
             completionHandler?(image: image, error: error, imageURL: imageURL)
         }
     }
     
     public func setImageNoAnimation(withURLPath URLPath: String?) {
-        guard let URLPath = URLPath, URL = NSURL(string: URLPath) else { return }
+        guard let URLPath = URLPath, let URL = URL(string: URLPath) else { return }
         kf_setImageWithURL(URL)
     }
 }

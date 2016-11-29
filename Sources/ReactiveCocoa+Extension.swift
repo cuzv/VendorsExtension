@@ -71,7 +71,7 @@ public extension SignalProducer {
     }
 }
 
-public func merge<Value, Error: ErrorType>(producers: [SignalProducer<Value, Error>]) -> SignalProducer<Value, Error> {
+public func merge<Value, Error: Error>(_ producers: [SignalProducer<Value, Error>]) -> SignalProducer<Value, Error> {
     return SignalProducer<SignalProducer<Value, Error>, Error>(values: producers).flatten(.Merge)
 }
 
@@ -84,51 +84,51 @@ extension NSObject {
 
 // MARK: - Signal
 
-public func merge<Value, Error: ErrorType>(signals: [Signal<Value, Error>]) -> Signal<Value, Error> {
+public func merge<Value, Error: Error>(_ signals: [Signal<Value, Error>]) -> Signal<Value, Error> {
     return Signal<Value, Error>.merge(signals)
 }
 
-public func mergeErrors(errors: [Signal<NSError, NoError>]) -> MutableProperty<NSError> {
+public func mergeErrors(_ errors: [Signal<NSError, NoError>]) -> MutableProperty<NSError> {
     return merge(errors).rac_next(NSError.empty())
 }
 
-public func mergeActionsErrors<Input, Output>(actions: [ReactiveCocoa.Action<Input, Output, NSError>]) -> MutableProperty<NSError> {
+public func mergeActionsErrors<Input, Output>(_ actions: [ReactiveCocoa.Action<Input, Output, NSError>]) -> MutableProperty<NSError> {
     return mergeErrors(actions.map { $0.errors })
 }
 
-public func mergeValues<Output>(values: [Signal<Output, NoError>], initialValue: Output) -> MutableProperty<Output> {
+public func mergeValues<Output>(_ values: [Signal<Output, NoError>], initialValue: Output) -> MutableProperty<Output> {
     return merge(values).rac_next(initialValue)
 }
 
-public func mergeActionsValues<Input, Output>(actions: [ReactiveCocoa.Action<Input, Output, NSError>], initialValue: Output) -> MutableProperty<Output> {
+public func mergeActionsValues<Input, Output>(_ actions: [ReactiveCocoa.Action<Input, Output, NSError>], initialValue: Output) -> MutableProperty<Output> {
     return mergeValues(actions.map( { $0.values }), initialValue: initialValue)
 }
 
-public func mergeExecuting(executings: [AnyProperty<Bool>]) -> AnyProperty<Bool> {
+public func mergeExecuting(_ executings: [AnyProperty<Bool>]) -> AnyProperty<Bool> {
     return AnyProperty(initialValue: false, producer: merge(executings.map { $0.producer }))
 }
 
-public func mergeActionsExecuting<Input, Output>(actions: [ReactiveCocoa.Action<Input, Output, NSError>]) -> AnyProperty<Bool> {
+public func mergeActionsExecuting<Input, Output>(_ actions: [ReactiveCocoa.Action<Input, Output, NSError>]) -> AnyProperty<Bool> {
     return AnyProperty(initialValue: false, producer: merge(actions.map { $0.executing.producer }))
 }
 
 // MARK: - Timer
 
 final public class CountdownTimer {
-    private let startTime: NSDate
-    private let interval: NSTimeInterval
-    private let duration: NSTimeInterval
-    private var next: ((NSTimeInterval) -> ())
-    private var completion: (() -> ())
+    fileprivate let startTime: Date
+    fileprivate let interval: TimeInterval
+    fileprivate let duration: TimeInterval
+    fileprivate var next: ((TimeInterval) -> ())
+    fileprivate var completion: (() -> ())
     
-    private var disposable: Disposable?
+    fileprivate var disposable: Disposable?
     
     public init(
-        startTime: NSDate = NSDate(),
-        interval: NSTimeInterval = 1,
-        duration: NSTimeInterval = 60,
-        next: ((NSTimeInterval) -> ()),
-        completion: (() -> ()))
+        startTime: Date = Date(),
+        interval: TimeInterval = 1,
+        duration: TimeInterval = 60,
+        next: @escaping ((TimeInterval) -> ()),
+        completion: @escaping (() -> ()))
     {
         self.startTime = startTime
         self.interval = interval
@@ -155,7 +155,7 @@ final public class CountdownTimer {
     
 #if DEBUG
     deinit {
-        debugPrint("\(#file):\(#line):\(self.dynamicType):\(#function)")
+        debugPrint("\(#file):\(#line):\(type(of: self)):\(#function)")
     }
 #endif
 }
@@ -164,18 +164,18 @@ final public class CountdownTimer {
 //  https://github.com/ColinEberhardt/ReactiveTwitterSearch/blob/master/ReactiveTwitterSearch/Util/UIKitExtensions.swift
 
 private struct AssociationKey {
-    private static var hidden: String  = "rac_hidden"
-    private static var alpha: String   = "rac_alpha"
-    private static var text: String    = "rac_text"
-    private static var image: String   = "rac_image"
-    private static var enabled: String = "rac_enabled"
-    private static var index: String = "rac_index"
+    fileprivate static var hidden: String  = "rac_hidden"
+    fileprivate static var alpha: String   = "rac_alpha"
+    fileprivate static var text: String    = "rac_text"
+    fileprivate static var image: String   = "rac_image"
+    fileprivate static var enabled: String = "rac_enabled"
+    fileprivate static var index: String = "rac_index"
 }
 
 /// Lazily creates a gettable associated property via the given factory.
 internal func lazyAssociatedProperty<T: AnyObject>(
-    host host: AnyObject,
-    key: UnsafePointer<Void>,
+    host: AnyObject,
+    key: UnsafeRawPointer,
     factory: ()->T) -> T
 {
     return objc_getAssociatedObject(host, key) as? T ?? {
@@ -186,10 +186,10 @@ internal func lazyAssociatedProperty<T: AnyObject>(
 }
 
 private func lazyMutableProperty<T>(
-    host host: AnyObject,
-    key: UnsafePointer<Void>,
-    setter: T -> (),
-    getter: () -> T) -> MutableProperty<T>
+    host: AnyObject,
+    key: UnsafeRawPointer,
+    setter: @escaping (T) -> (),
+    getter: @escaping () -> T) -> MutableProperty<T>
 {
     return lazyAssociatedProperty(host: host, key: key) {
         let property = MutableProperty<T>(getter())
@@ -366,7 +366,7 @@ public extension UIButton {
 }
 
 public extension SignalProducerType {
-    public func startWithTradNext(next: Self.Value -> Void) -> Disposable {
+    public func startWithTradNext(_ next: (Self.Value) -> Void) -> Disposable {
         return startWithResult { (result: Result<Self.Value, Self.Error>) in
             if case .Success(let value) = result {
                 next(value)
@@ -376,7 +376,7 @@ public extension SignalProducerType {
 }
 
 public extension SignalType {
-    public func observeTradNext(next: Self.Value -> Void) -> Disposable? {
+    public func observeTradNext(_ next: (Self.Value) -> Void) -> Disposable? {
         return observeResult { (result: Result<Self.Value, Self.Error>) in
             if case .Success(let value) = result {
                 next(value)
@@ -386,7 +386,7 @@ public extension SignalType {
 }
 
 public extension SignalProducer {
-    public func rac_values(initialValue: Value) -> MutableProperty<Value> {
+    public func rac_values(_ initialValue: Value) -> MutableProperty<Value> {
         let property = MutableProperty<Value>(initialValue)
         
         startWithTradNext { (value) -> () in
@@ -396,7 +396,7 @@ public extension SignalProducer {
         return property
     }
     
-    public func rac_errors(initialValue: Error) -> MutableProperty<Error> {
+    public func rac_errors(_ initialValue: Error) -> MutableProperty<Error> {
         let property = MutableProperty<Error>(initialValue)
         
         startWithFailed { (error) -> () in
@@ -408,7 +408,7 @@ public extension SignalProducer {
 }
 
 public extension Signal {
-    public func rac_next(initialValue: Value) -> MutableProperty<Value> {
+    public func rac_next(_ initialValue: Value) -> MutableProperty<Value> {
         let property = MutableProperty<Value>(initialValue)
         
         observeTradNext { (value) -> () in
@@ -418,7 +418,7 @@ public extension Signal {
         return property
     }
     
-    public func rac_errors(initialValue: Error) -> MutableProperty<Error> {
+    public func rac_errors(_ initialValue: Error) -> MutableProperty<Error> {
         let property = MutableProperty<Error>(initialValue)
         
         observeFailed { (error) -> () in
@@ -430,11 +430,11 @@ public extension Signal {
 }
 
 public extension Action {
-    public func rac_errors(initialValue: Error) -> MutableProperty<Error> {
+    public func rac_errors(_ initialValue: Error) -> MutableProperty<Error> {
         return errors.rac_next(initialValue)
     }
     
-    public func rac_values(initialValue: Output) -> MutableProperty<Output> {
+    public func rac_values(_ initialValue: Output) -> MutableProperty<Output> {
         return values.rac_next(initialValue)
     }
 }
@@ -442,7 +442,7 @@ public extension Action {
 // MARK: - CocoaAction
 
 public extension UIControl {
-    public func addCocoaAction(target target: CocoaAction, forControlEvents events: UIControlEvents = .TouchUpInside) {
+    public func addCocoaAction(target: CocoaAction, forControlEvents events: UIControlEvents = .touchUpInside) {
         addTarget(target, action: CocoaAction.selector, forControlEvents: events)
     }
 }
@@ -470,7 +470,7 @@ private extension Redes.Request {
     var asyncDownloadProducer: SignalProducer <NSURL, NSError> {
         return SignalProducer { observer, disposable in
             self.response(queue: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) { (req: NSURLRequest?, resp: NSHTTPURLResponse?, data: NSData?, error: NSError?) in
-                if let suggestedDestination = resp?.suggestedDestination where nil == error {
+                if let suggestedDestination = resp?.suggestedDestination, nil == error {
                     observer.sendNext(suggestedDestination)
                     observer.sendCompleted()
                 } else {

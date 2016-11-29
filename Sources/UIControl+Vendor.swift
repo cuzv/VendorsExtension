@@ -31,14 +31,14 @@ import ReactiveCocoa
 // MARK: - SegmentedToggleControl
 
 final public class SegmentedToggleControl: UIControl {
-    private var items: [String]
-    private var buttons: [UIButton] = []
-    private let normalTextColor: UIColor
-    private let selectedTextColor: UIColor
+    fileprivate var items: [String]
+    fileprivate var buttons: [UIButton] = []
+    fileprivate let normalTextColor: UIColor
+    fileprivate let selectedTextColor: UIColor
     
-    private var font: UIFont!
-    private var lastSelectedIndex = 0
-    private var firstTime: Bool = true
+    fileprivate var font: UIFont!
+    fileprivate var lastSelectedIndex = 0
+    fileprivate var firstTime: Bool = true
 
     public var selectedSegmentIndex: Int = 0 {
         didSet {
@@ -57,7 +57,7 @@ final public class SegmentedToggleControl: UIControl {
     
     public init(
         items: [String],
-        normalTextColor: UIColor = UIColor.blackColor(),
+        normalTextColor: UIColor = UIColor.black,
         selectedTextColor: UIColor = UIColor.tintColor)
     {
         if items.count < 2 {
@@ -67,15 +67,15 @@ final public class SegmentedToggleControl: UIControl {
         self.items = items
         self.normalTextColor = normalTextColor
         self.selectedTextColor = selectedTextColor
-        super.init(frame: CGRectZero)
+        super.init(frame: CGRect.zero)
         setup()
     }
     
-    override private init(frame: CGRect) {
+    override fileprivate init(frame: CGRect) {
         fatalError("Use init(actionHandler:) instead.")
     }
     
-    private init() {
+    fileprivate init() {
         fatalError("Use init(actionHandler:) instead.")
     }
     
@@ -83,7 +83,7 @@ final public class SegmentedToggleControl: UIControl {
         fatalError("init(coder:) has not been implemented")
     }
     
-    public override func intrinsicContentSize() -> CGSize {
+    public override var intrinsicContentSize : CGSize {
         // Calculate text size
         let str = items.reduce("") { (str1, str2) -> String in
             return "\(str1)\(str2)"
@@ -94,7 +94,7 @@ final public class SegmentedToggleControl: UIControl {
             size.height = size.height >= 44 ? size.height : 44
             return size
         } else {
-            return CGSizeMake(60, 44)
+            return CGSize(width: 60, height: 44)
         }
     }
 
@@ -102,7 +102,7 @@ final public class SegmentedToggleControl: UIControl {
         super.layoutSubviews()
         
         if !autoComputeLineWidth && firstTime {
-            lineView.snp_remakeConstraints(closure: { (make) -> Void in
+            lineView.snp_remakeConstraints({ (make) -> Void in
                 make.width.equalTo(lineViewWidthForIndex(selectedSegmentIndex))
                 make.height.equalTo(1)
                 make.bottom.equalTo(self)
@@ -115,10 +115,10 @@ final public class SegmentedToggleControl: UIControl {
 }
 
 public extension SegmentedToggleControl {
-    private func setup() {
-        let blurBackgroundView = UIToolbar(frame: CGRectZero)
-        blurBackgroundView.barStyle = .Default
-        blurBackgroundView.translucent = true
+    fileprivate func setup() {
+        let blurBackgroundView = UIToolbar(frame: CGRect.zero)
+        blurBackgroundView.barStyle = .default
+        blurBackgroundView.isTranslucent = true
         blurBackgroundView.clipsToBounds = true
         addSubview(blurBackgroundView)
         blurBackgroundView.snp_makeConstraints { (make) in
@@ -129,18 +129,18 @@ public extension SegmentedToggleControl {
         let count = items.count
         for i in 0 ..< count {
             // Make button
-            let button = UIButton(type: .System)
+            let button = UIButton(type: .system)
             button.tag = i
-            button.addTarget(self, action: #selector(SegmentedToggleControl.hanleClickAction(_:)), forControlEvents: .TouchUpInside)
+            button.addTarget(self, action: #selector(SegmentedToggleControl.hanleClickAction(_:)), for: .touchUpInside)
             button.title = items[i]
-            button.setTitleColor(normalTextColor, forState: .Normal)
-            button.setTitleColor(selectedTextColor, forState: .Selected)
-            button.tintColor = UIColor.clearColor()
-            button.backgroundColor = UIColor.clearColor()
+            button.setTitleColor(normalTextColor, for: UIControlState())
+            button.setTitleColor(selectedTextColor, for: .selected)
+            button.tintColor = UIColor.clear
+            button.backgroundColor = UIColor.clear
             addSubview(button)
             
             // Set position
-            button.snp_makeConstraints(closure: { (make) -> Void in
+            button.snp_makeConstraints({ (make) -> Void in
                 make.top.equalTo(self)
                 make.bottom.equalTo(self)
                 if let lastButton = lastButton {
@@ -163,7 +163,7 @@ public extension SegmentedToggleControl {
         font = lastButton.titleLabel?.font
         
         if let firstButton = buttons.first {
-            firstButton.selected = true
+            firstButton.isSelected = true
             
             addSubview(lineView)
             lineView.backgroundColor = selectedTextColor
@@ -176,29 +176,29 @@ public extension SegmentedToggleControl {
         }
     }
     
-    private func updateAppearance() {
+    fileprivate func updateAppearance() {
         let sender  = buttons[selectedSegmentIndex]
         // toggle selected button
         buttons.forEach { (button) -> () in
-            button.selected = false
+            button.isSelected = false
         }
-        sender.selected = true
+        sender.isSelected = true
         
         // Move lineView
-        if let index = buttons.indexOf(sender) {
+        if let index = buttons.index(of: sender) {
             remakeLineViewConstraintsForIndex(index)
         }
         
         // Send action
-        sendActionsForControlEvents(.ValueChanged)
+        sendActions(for: .valueChanged)
     }
     
-    internal func hanleClickAction(sender: UIButton) {
+    internal func hanleClickAction(_ sender: UIButton) {
         selectedSegmentIndex = sender.tag
     }
     
-    private func remakeLineViewConstraintsForIndex(index: Int) {
-        lineView.snp_remakeConstraints(closure: { (make) -> Void in
+    fileprivate func remakeLineViewConstraintsForIndex(_ index: Int) {
+        lineView.snp_remakeConstraints({ (make) -> Void in
             make.width.equalTo(lineViewWidthForIndex(index))
             make.height.equalTo(1)
             make.bottom.equalTo(self)
@@ -206,12 +206,12 @@ public extension SegmentedToggleControl {
             make.centerX.equalTo(currentButton)
         })
         
-        let duration: NSTimeInterval = fabs(Double(lastSelectedIndex - index)) * 0.1
+        let duration: TimeInterval = fabs(Double(lastSelectedIndex - index)) * 0.1
         if duration <= 0 || nil == window {
             setNeedsLayout()
             layoutIfNeeded()
         } else {
-            UIView.animateWithDuration(duration, animations: { () -> Void in
+            UIView.animate(withDuration: duration, animations: { () -> Void in
                 self.setNeedsLayout()
                 self.layoutIfNeeded()
             })
@@ -220,18 +220,18 @@ public extension SegmentedToggleControl {
         lastSelectedIndex = selectedSegmentIndex
     }
     
-    private func lineViewWidthForIndex(index: Int) -> CGFloat {
+    fileprivate func lineViewWidthForIndex(_ index: Int) -> CGFloat {
         if autoComputeLineWidth {
             return items[index].sizeFrom(font: font).width
         } else {
-            return (CGRectGetWidth(bounds) / CGFloat(items.count)).ceilly
+            return (bounds.width / CGFloat(items.count)).ceilly
         }
     }
 }
 
 public extension SegmentedToggleControl {
     /// can only have image or title, not both. must be 0..#segments - 1 (or ignored). default is nil
-    public func set(title title: String, forSegmentAtIndex segment: Int) {
+    public func set(title: String, forSegmentAtIndex segment: Int) {
         if items.count <= segment {
             debugPrint("Index beyound the boundary.")
             return
@@ -241,11 +241,11 @@ public extension SegmentedToggleControl {
         button.title = title
         button.image = nil
         
-        items.replace(atIndex: segment, with: title)
+        items.replace(at: segment, with: title)
         remakeLineViewConstraintsForIndex(segment)
     }
     
-    public func titleForSegmentAtIndex(segment: Int) -> String? {
+    public func titleForSegmentAtIndex(_ segment: Int) -> String? {
         if items.count <= segment {
             return nil
         }
@@ -254,7 +254,7 @@ public extension SegmentedToggleControl {
     }
 
     /// can only have image or title, not both. must be 0..#segments - 1 (or ignored). default is nil
-    public func set(image image: UIImage, forSegmentAtIndex segment: Int) {
+    public func set(image: UIImage, forSegmentAtIndex segment: Int) {
         if items.count <= segment {
             debugPrint("Index beyound the boundary.")
             return
@@ -265,7 +265,7 @@ public extension SegmentedToggleControl {
         button.title = nil
     }
     
-    public func imageForSegmentAtIndex(segment: Int) -> UIImage? {
+    public func imageForSegmentAtIndex(_ segment: Int) -> UIImage? {
         if items.count <= segment {
             return nil
         }
