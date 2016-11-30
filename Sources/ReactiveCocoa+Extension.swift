@@ -291,7 +291,7 @@ public extension UITextView {
     // 中文输入出现问题
 //    public var rac_text: MutableProperty<String> {
 //        return lazyAssociatedProperty(host: self, key: &AssociationKey.text) {
-//            NSNotificationCenter.defaultCenter()
+//            NotificationCenter.default
 //                .rac_notifications(UITextViewTextDidChangeNotification, object: self)
 //                .takeUntil(self.rac_willDeinitProducer)
 //                .startWithNext({ [weak self] (notification) -> () in
