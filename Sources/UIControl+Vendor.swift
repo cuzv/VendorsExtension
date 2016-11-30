@@ -27,6 +27,7 @@
 import UIKit
 import SnapKit
 import ReactiveCocoa
+import ReactiveSwift
 
 // MARK: - SegmentedToggleControl
 
@@ -58,7 +59,7 @@ final public class SegmentedToggleControl: UIControl {
     public init(
         items: [String],
         normalTextColor: UIColor = UIColor.black,
-        selectedTextColor: UIColor = UIColor.tintColor)
+        selectedTextColor: UIColor = UIColor.tint)
     {
         if items.count < 2 {
             fatalError("items.count can not less 2.")
@@ -102,7 +103,7 @@ final public class SegmentedToggleControl: UIControl {
         super.layoutSubviews()
         
         if !autoComputeLineWidth && firstTime {
-            lineView.snp_remakeConstraints({ (make) -> Void in
+            lineView.snp.remakeConstraints({ (make) -> Void in
                 make.width.equalTo(lineViewWidthForIndex(selectedSegmentIndex))
                 make.height.equalTo(1)
                 make.bottom.equalTo(self)
@@ -121,7 +122,7 @@ public extension SegmentedToggleControl {
         blurBackgroundView.isTranslucent = true
         blurBackgroundView.clipsToBounds = true
         addSubview(blurBackgroundView)
-        blurBackgroundView.snp_makeConstraints { (make) in
+        blurBackgroundView.snp.makeConstraints { (make) in
             make.edges.equalTo(self)
         }
         
@@ -140,12 +141,12 @@ public extension SegmentedToggleControl {
             addSubview(button)
             
             // Set position
-            button.snp_makeConstraints({ (make) -> Void in
+            button.snp.makeConstraints({ (make) -> Void in
                 make.top.equalTo(self)
                 make.bottom.equalTo(self)
                 if let lastButton = lastButton {
-                    make.left.equalTo(lastButton.snp_right)
-                    make.width.equalTo(lastButton.snp_width)
+                    make.left.equalTo(lastButton.snp.right)
+                    make.width.equalTo(lastButton.snp.width)
                 } else {
                     make.left.equalTo(self)
                 }
@@ -167,7 +168,7 @@ public extension SegmentedToggleControl {
             
             addSubview(lineView)
             lineView.backgroundColor = selectedTextColor
-            lineView.snp_makeConstraints { (make) -> Void in
+            lineView.snp.makeConstraints { (make) -> Void in
                 make.width.equalTo(lineViewWidthForIndex(0))
                 make.height.equalTo(1)
                 make.centerX.equalTo(firstButton)
@@ -198,7 +199,7 @@ public extension SegmentedToggleControl {
     }
     
     fileprivate func remakeLineViewConstraintsForIndex(_ index: Int) {
-        lineView.snp_remakeConstraints({ (make) -> Void in
+        lineView.snp.remakeConstraints({ (make) -> Void in
             make.width.equalTo(lineViewWidthForIndex(index))
             make.height.equalTo(1)
             make.bottom.equalTo(self)

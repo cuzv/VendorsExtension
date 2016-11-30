@@ -31,17 +31,17 @@ import Toucan
 public extension UIImage {
     /// Crop will resize to fit one dimension, then crop the other.
     public func cropResize(_ size: CGSize) -> UIImage {
-        return Toucan(image: self).resize(size, fitMode: Toucan.Resize.FitMode.Crop).image
+        return Toucan(image: self).resize(size, fitMode: Toucan.Resize.FitMode.crop).image
     }
     
     /// Clip will resize so one dimension is equal to the size, the other shrunk down to retain aspect ratio.
     public func clipResize(_ size: CGSize) -> UIImage {
-        return Toucan(image: self).resize(size, fitMode: Toucan.Resize.FitMode.Clip).image
+        return Toucan(image: self).resize(size, fitMode: Toucan.Resize.FitMode.clip).image
     }
     
     /// Scale will resize so the image fits exactly, altering the aspect ratio.
     public func scaleResize(_ size: CGSize) -> UIImage {
-        return Toucan(image: self).resize(size, fitMode: Toucan.Resize.FitMode.Scale).image
+        return Toucan(image: self).resize(size, fitMode: Toucan.Resize.FitMode.scale).image
     }
     
     /// Demonstrate creating a circular mask -> resizes to a square image then mask with an ellipse.
@@ -161,13 +161,14 @@ public extension UIImageView {
         completionHandler: ((_ image: UIImage?, _ error: NSError?, _ imageURL: URL?) -> Void)? = nil)
     {
         guard let URLPath = URLPath, let URL = URL(string: URLPath) else { return }
-        kf_setImageWithURL(URL, placeholderImage: placeholderImage, optionsInfo: [.Transition(ImageTransition.Fade(0.5))], progressBlock: progressBlock) { (image, error, cacheType, imageURL) -> () in
-            completionHandler?(image: image, error: error, imageURL: imageURL)
+        
+        kf.setImage(with: URL, placeholder: placeholderImage, options: [.transition(ImageTransition.fade(0.5))], progressBlock: progressBlock) { (image, error, cacheType, imageURL) -> () in
+            completionHandler?(image, error, imageURL)
         }
     }
     
     public func setImageNoAnimation(withURLPath URLPath: String?) {
         guard let URLPath = URLPath, let URL = URL(string: URLPath) else { return }
-        kf_setImageWithURL(URL)
+        kf.setImage(with: URL)
     }
 }
