@@ -135,7 +135,7 @@ public extension SegmentedToggleControl {
             button.tag = i
             button.addTarget(self, action: #selector(SegmentedToggleControl.hanleClickAction(_:)), for: .touchUpInside)
             button.title = items[i]
-            button.setTitleColor(normalTextColor, for: UIControlState())
+            button.setTitleColor(normalTextColor, for: .normal)
             button.setTitleColor(selectedTextColor, for: .selected)
             button.tintColor = UIColor.clear
             button.backgroundColor = UIColor.clear
