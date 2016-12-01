@@ -28,6 +28,7 @@ import UIKit
 import SnapKit
 import ReactiveCocoa
 import ReactiveSwift
+import ExtensionKit
 
 // MARK: - SegmentedToggleControl
 
@@ -90,7 +91,7 @@ final public class SegmentedToggleControl: UIControl {
             return "\(str1)\(str2)"
         }
         if let font = font {
-            var size = str.sizeFrom(font: font)
+            var size = str.layoutSize(font: font)
             size.width += CGFloat(items.count * 12)
             size.height = size.height >= 44 ? size.height : 44
             return size
@@ -223,9 +224,9 @@ public extension SegmentedToggleControl {
     
     fileprivate func lineViewWidthForIndex(_ index: Int) -> CGFloat {
         if autoComputeLineWidth {
-            return items[index].sizeFrom(font: font).width
+            return items[index].layoutSize(font: font).width
         } else {
-            return (bounds.width / CGFloat(items.count)).ceilly
+            return (bounds.size.width / CGFloat(items.count)).ceilling
         }
     }
 }
