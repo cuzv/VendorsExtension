@@ -78,9 +78,9 @@ public extension SignalProducer {
     
     public func filterEmpty() -> SignalProducer<Value, Error> {
         return filter { (value: Value) -> Bool in
-            if let arr = value as? [AnyObject] {
+            if let arr = value as? [Any] {
                 return !arr.isEmpty
-            } else if let dict = value as? [String: AnyObject] {
+            } else if let dict = value as? [String: Any] {
                 return !dict.isEmpty
             } else if let globalDataMetric = value as? TCGlobalDataMetric {
                 return !globalDataMetric.isEmpty
@@ -124,6 +124,10 @@ extension NSObject {
     /// In common use: SignalProducer.takeUntil(rac_willDeinitProducer)
     public var rac_willDeinitProducer: SignalProducer<(), NoError> {
         return SignalProducer(signal: reactive.trigger(for: NSSelectorFromString("dealloc"))).ignoreError()
+    }
+    
+    public var rac_willDeinitSignal: Signal<(), NoError> {
+        return reactive.trigger(for: NSSelectorFromString("dealloc"))
     }
 }
 
@@ -457,12 +461,12 @@ public extension UIButton {
 // MARK: - Redes
 
 private extension Redes.DataRequest {
-    var producer: SignalProducer <AnyObject, NSError>  {
+    var producer: SignalProducer <Any, NSError>  {
         return SignalProducer { observer, disposable in
             self.responseJSON { (resp: DataResponse<Any>) -> () in
                 switch resp.result {
                 case let .success(value):
-                    observer.send(value: value as AnyObject)
+                    observer.send(value: value)
                     observer.sendCompleted()
                 case let .failure(error):
                     observer.send(error: error as NSError)
@@ -474,12 +478,12 @@ private extension Redes.DataRequest {
         }
     }
     
-    var asyncProducer: SignalProducer <AnyObject, NSError>  {
+    var asyncProducer: SignalProducer <Any, NSError>  {
         return SignalProducer { observer, disposable in
             self.responseJSON(queue: DispatchQueue.global()) { (resp: DataResponse<Any>) -> () in
                 switch resp.result {
                 case let .success(value):
-                    observer.send(value: value as AnyObject)
+                    observer.send(value: value)
                     observer.sendCompleted()
                 case let .failure(error):
                     observer.send(error: error as NSError)
@@ -493,11 +497,11 @@ private extension Redes.DataRequest {
 }
 
 private extension Redes.DownloadRequest {
-    var asyncProducer: SignalProducer <AnyObject, NSError>  {
+    var asyncProducer: SignalProducer <Any, NSError>  {
         return SignalProducer { observer, disposable in
             self.response(queue: DispatchQueue.global()) { (resp: DefaultDownloadResponse) in
                 if let destinationURL = resp.destinationURL, resp.error == nil {
-                    observer.send(value: destinationURL as AnyObject)
+                    observer.send(value: destinationURL)
                     observer.sendCompleted()
                 } else {
                     observer.send(error: resp.error as! NSError)
@@ -511,15 +515,15 @@ private extension Redes.DownloadRequest {
 }
 
 public extension Redes.BatchRequest {
-    public var producer: SignalProducer<[AnyObject], NSError> {
-        let producers = requests.map { (req: Requestable) -> SignalProducer<AnyObject, NSError> in
+    public var producer: SignalProducer<[Any], NSError> {
+        let producers = requests.map { (req: Requestable) -> SignalProducer<Any, NSError> in
             return req.producer
         }
         return SignalProducer.combineLatest(producers)
     }
     
-    public var asyncProducer: SignalProducer<[AnyObject], NSError> {
-        let producers = requests.map { (req: Requestable) -> SignalProducer<AnyObject, NSError> in
+    public var asyncProducer: SignalProducer<[Any], NSError> {
+        let producers = requests.map { (req: Requestable) -> SignalProducer<Any, NSError> in
             return req.asyncProducer
         }
         return SignalProducer.combineLatest(producers)
@@ -537,11 +541,11 @@ public extension Redes.BatchRequest {
 }
 
 public extension Redes.Requestable {
-    public var asyncProducer: SignalProducer <AnyObject, NSError>  {
+    public var asyncProducer: SignalProducer <Any, NSError>  {
         return makeRequest().resume().asyncProducer
     }
     
-    public var producer: SignalProducer <AnyObject, NSError>  {
+    public var producer: SignalProducer <Any, NSError>  {
         return makeRequest().resume().asyncProducer
     }
 }
