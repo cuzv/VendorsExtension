@@ -153,6 +153,10 @@ public extension Signal {
         
         return property
     }
+    
+    public func observeOnUIScheduler() -> Signal<Value, Error> {
+        return observe(on: UIScheduler())
+    }
 }
 
 // MARK: - Action
