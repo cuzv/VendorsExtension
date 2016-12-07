@@ -255,6 +255,10 @@ private struct AssociationKey {
     fileprivate static var image: String   = "rac_image"
     fileprivate static var enabled: String = "rac_enabled"
     fileprivate static var index: String = "rac_index"
+
+    fileprivate static var delegate: String = "rac_delegate"
+    fileprivate static var search: String = "rac_search"
+
 }
 
 /// Lazily creates a gettable associated property via the given factory.
@@ -370,64 +374,6 @@ public extension UITextView {
     }
 }
 
-
-extension Reactive where Base: NSObject {
-    internal func associatedValue<T>(forKey key: StaticString = #function, initial: (Base) -> T) -> T {
-        var value = objc_getAssociatedObject(base, key.utf8Start) as! T?
-        if value == nil {
-            value = initial(base)
-            objc_setAssociatedObject(base, key.utf8Start, value, .OBJC_ASSOCIATION_RETAIN)
-        }
-        return value!
-    }
-}
-
-extension NSObject {
-    @nonobjc internal final func synchronized<Result>(execute: () throws -> Result) rethrows -> Result {
-        objc_sync_enter(self)
-        defer { objc_sync_exit(self) }
-        return try execute()
-    }
-}
-
-
-extension Reactive where Base: UISearchBar {
-    func _trigger(for selector: Selector) -> Signal<(), NoError> {
-        return base.synchronized {
-            let map = associatedValue { _ in NSMutableDictionary() }
-            
-            let selectorName = String(describing: selector) as NSString
-            if let signal = map.object(forKey: selectorName) as! Signal<(), NoError>? {
-                return signal
-            }
-            
-            let (signal, observer) = Signal<(), NoError>.pipe()
-            let isSuccessful = base._rac_setupInvocationObservation(for: selector,
-                                                                    protocol: UISearchBarDelegate.self,
-                                                                    receiver: observer.send(value:))
-            precondition(isSuccessful)
-            
-            lifetime.ended.observeCompleted(observer.sendCompleted)
-            map.setObject(signal, forKey: selectorName)
-            
-            return signal
-        }
-    }
-}
-
-public extension UISearchBar {
-    public var rac_text: MutableProperty<String> {
-        let property = MutableProperty<String>(text ?? "")
-        
-        let signal = reactive._trigger(for: #selector(UISearchBarDelegate.searchBar(_:textDidChange:)))
-        signal.observeSuccess { () in
-            property.value = self.text ?? ""
-        }
-        
-        return property
-    }
-}
-
 public extension UIImageView {
     public var rac_image: MutableProperty<UIImage?> {
         return lazyMutableProperty(
@@ -447,6 +393,50 @@ public extension UIButton {
             setter: { self.isEnabled = $0 },
             getter: { self.isEnabled }
         )
+    }
+}
+
+extension UISearchBar {
+    var rac_text: MutableProperty<String?> {
+        return lazyAssociatedProperty(host: self, key: &AssociationKey.text) {
+            self.delegate = self.delegateProxy
+            let property = MutableProperty<String?>(self.text)
+            property <~ self.delegateProxy.textPipe.signal
+            return property
+        }
+    }
+    
+    var rac_search: MutableProperty<String?> {
+        return lazyAssociatedProperty(host: self, key: &AssociationKey.search) {
+            self.delegate = self.delegateProxy
+            let property = MutableProperty<String?>(self.text)
+            property <~ self.delegateProxy.searchPipe.signal
+            return property
+        }
+    }
+    
+    private var delegateProxy: UISearchBarDelegateProxy {
+        return lazyAssociatedProperty(host: self, key: &AssociationKey.delegate) {
+            return UISearchBarDelegateProxy(textPipe: Signal<String?, NoError>.pipe(), searchPipe: Signal<String?, NoError>.pipe())
+        }
+    }
+    
+    typealias Pipe = (signal: Signal<String?, NoError>, observer: Observer<String?, NoError>)
+    private class UISearchBarDelegateProxy: NSObject, UISearchBarDelegate {
+        let textPipe: Pipe
+        let searchPipe: Pipe
+        init(textPipe: Pipe, searchPipe: Pipe) {
+            self.textPipe = textPipe
+            self.searchPipe = searchPipe
+        }
+        
+        @objc func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+            textPipe.observer.send(value: searchBar.text)
+        }
+        
+        @objc func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+            searchPipe.observer.send(value: searchBar.text)
+        }
     }
 }
 
@@ -548,3 +538,9 @@ public extension Redes.Downloadable {
         return makeRequest().resume().asyncProducer.map { $0 as! URL }
     }
 }
+
+
+
+
+
+
