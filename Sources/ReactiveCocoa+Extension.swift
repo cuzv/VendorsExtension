@@ -120,17 +120,6 @@ public func merge<Value, Error: Swift.Error>(_ producers: [SignalProducer<Value,
     return SignalProducer<SignalProducer<Value, Error>, Error>(values: producers).flatten(.merge)
 }
 
-extension NSObject {
-    /// In common use: SignalProducer.takeUntil(rac_willDeinitProducer)
-    public var rac_willDeinitProducer: SignalProducer<(), NoError> {
-        return SignalProducer(signal: reactive.trigger(for: NSSelectorFromString("dealloc"))).ignoreError()
-    }
-    
-    public var rac_willDeinitSignal: Signal<(), NoError> {
-        return reactive.trigger(for: NSSelectorFromString("dealloc"))
-    }
-}
-
 // MARK: - Signal
 
 public extension Signal {
