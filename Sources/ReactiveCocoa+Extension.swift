@@ -462,7 +462,7 @@ private extension Redes.DataRequest {
                     observer.send(value: value)
                     observer.sendCompleted()
                 case let .failure(error):
-                    observer.send(error: error as NSError)
+                    observer.send(error: NSErrorFrom(message: error.errorDescription))
                 }
             }
             disposable.add {
@@ -479,7 +479,7 @@ private extension Redes.DataRequest {
                     observer.send(value: value)
                     observer.sendCompleted()
                 case let .failure(error):
-                    observer.send(error: error as NSError)
+                    observer.send(error: NSErrorFrom(message: error.errorDescription))
                 }
             }
             disposable.add {
@@ -497,7 +497,7 @@ private extension Redes.DownloadRequest {
                     observer.send(value: destinationURL)
                     observer.sendCompleted()
                 } else {
-                    observer.send(error: resp.error as! NSError)
+                    observer.send(error: NSErrorFrom(message: resp.error!.localizedDescription))
                 }
             }
             disposable.add {
