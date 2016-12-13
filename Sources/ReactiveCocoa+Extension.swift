@@ -443,6 +443,21 @@ extension UISearchBar {
 
 // MARK: - Redes
 
+extension RedesError {
+    /// A localized message describing what error occurred.
+    public var nserror: NSError {
+        switch self {
+        case .internalFailed(reason: let reason):
+            return reason as NSError
+        case .parseFailed(reason: _):
+            return NSErrorFrom(message: "解析数据失败")
+        case .businessFailed(reason: let reason):
+            return NSErrorFrom(message: reason.message)
+        }
+    }
+}
+
+
 private extension Redes.DataRequest {
     var producer: SignalProducer <Any, NSError>  {
         return SignalProducer { observer, disposable in
@@ -452,7 +467,7 @@ private extension Redes.DataRequest {
                     observer.send(value: value)
                     observer.sendCompleted()
                 case let .failure(error):
-                    observer.send(error: NSErrorFrom(message: error.errorDescription))
+                    observer.send(error: error.nserror)
                 }
             }
             disposable.add {
@@ -469,7 +484,7 @@ private extension Redes.DataRequest {
                     observer.send(value: value)
                     observer.sendCompleted()
                 case let .failure(error):
-                    observer.send(error: NSErrorFrom(message: error.errorDescription))
+                    observer.send(error: error.nserror)
                 }
             }
             disposable.add {
