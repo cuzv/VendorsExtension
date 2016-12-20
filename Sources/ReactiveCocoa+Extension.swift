@@ -452,7 +452,7 @@ extension RedesError {
         case .parseFailed(reason: _):
             return NSErrorFrom(message: "解析数据失败")
         case .businessFailed(reason: let reason):
-            return NSErrorFrom(message: reason.message)
+            return NSErrorFrom(message: reason.message, code: reason.code)
         }
     }
 }
