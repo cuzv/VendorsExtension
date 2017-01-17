@@ -172,3 +172,34 @@ public extension UIImageView {
         kf.setImage(with: URL)
     }
 }
+
+
+public extension UIButton {
+    /// Set an image with a URLPath, a placeholder image, a reduceSize closure.
+    public func setImage(
+        withURLPath URLPath: String!,
+        placeholderImage: UIImage? = nil,
+        reduceSize: CGSize)
+    {
+        setImage(withURLPath: URLPath, placeholderImage: placeholderImage) {
+            [weak self] (image, error, imageURL) -> Void in
+            guard let this = self else { return }
+            guard let image = image else { return }
+            this.image = image.scaleResize(reduceSize)
+        }
+    }
+    
+    /// Set an image with a URLPath, a placeholder image, a reduceSize closure.
+    public func setImage(
+        withURLPath URLPath: String!,
+        placeholderImage: UIImage? = nil,
+        progressBlock: ((_ receivedSize: Int64, _ totalSize: Int64) -> Void)? = nil,
+        completionHandler: ((_ image: UIImage?, _ error: NSError?, _ imageURL: URL?) -> Void)? = nil)
+    {
+        guard let URLPath = URLPath, let URL = URL(string: URLPath) else { return }
+
+        kf.setImage(with: URL, for: .normal, placeholder: placeholderImage, options: [.transition(ImageTransition.fade(0.5))], progressBlock: progressBlock) { (image, error, cacheType, imageURL) -> () in
+            completionHandler?(image, error, imageURL)
+        }
+    }
+}
