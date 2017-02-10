@@ -538,15 +538,15 @@ public extension Redes.BatchRequest {
     }
 }
 
-public extension Redes.Requestable {
-    public var asyncProducer: SignalProducer <Any, NSError>  {
-        return makeRequest().resume().asyncProducer
-    }
-    
-    public var producer: SignalProducer <Any, NSError>  {
-        return makeRequest().resume().asyncProducer
-    }
-}
+//public extension Redes.Requestable {
+//    public var asyncProducer: SignalProducer <Any, NSError>  {
+//        return makeRequest().resume().asyncProducer
+//    }
+//    
+//    public var producer: SignalProducer <Any, NSError>  {
+//        return makeRequest().resume().asyncProducer
+//    }
+//}
 
 public extension Redes.Downloadable {
     public var asyncProducer: SignalProducer <URL, NSError> {
