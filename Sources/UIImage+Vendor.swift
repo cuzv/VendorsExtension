@@ -171,6 +171,10 @@ public extension UIImageView {
         guard let URLPath = URLPath, let URL = URL(string: URLPath) else { return }
         kf.setImage(with: URL)
     }
+    
+    public func cancelDownloadImage() {
+        kf.cancelDownloadTask()
+    }
 }
 
 
@@ -201,5 +205,10 @@ public extension UIButton {
         kf.setImage(with: URL, for: .normal, placeholder: placeholderImage, options: [.transition(ImageTransition.fade(0.5))], progressBlock: progressBlock) { (image, error, cacheType, imageURL) -> () in
             completionHandler?(image, error, imageURL)
         }
+    }
+    
+    public func cancelDownloadImage() {
+        kf.cancelImageDownloadTask()
+        kf.cancelBackgroundImageDownloadTask()
     }
 }

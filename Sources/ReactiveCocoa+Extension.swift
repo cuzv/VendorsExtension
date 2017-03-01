@@ -117,7 +117,7 @@ public extension SignalProducer {
 // MARK: -
 
 public func merge<Value, Error: Swift.Error>(_ producers: [SignalProducer<Value, Error>]) -> SignalProducer<Value, Error> {
-    return SignalProducer<SignalProducer<Value, Error>, Error>(values: producers).flatten(.merge)
+    return SignalProducer<SignalProducer<Value, Error>, Error>(producers).flatten(.merge)
 }
 
 // MARK: - Signal
@@ -341,7 +341,7 @@ public extension UISegmentedControl {
 
 public extension UITextField {
     public func rac_textSignalProducer() -> SignalProducer<String, NoError> {
-        return SignalProducer(signal: reactive.continuousTextValues)
+        return SignalProducer(reactive.continuousTextValues)
             .filter { $0 != nil }
             .map({ (str: String?) -> String in
                 if let str = str {
@@ -359,7 +359,7 @@ public extension UITextField {
 
 public extension UITextView {
     public func rac_textSignalProducer() -> SignalProducer<String, NoError> {
-        return SignalProducer(signal: reactive.continuousTextValues)
+        return SignalProducer(reactive.continuousTextValues)
             .map({ (str: String?) -> String in
                 if let str = str {
                     return str
@@ -417,7 +417,7 @@ extension UISearchBar {
     
     private var delegateProxy: UISearchBarDelegateProxy {
         return lazyAssociatedProperty(host: self, key: &AssociationKey.delegate) {
-            return UISearchBarDelegateProxy(textPipe: Signal<String?, NoError>.pipe(), searchPipe: Signal<String?, NoError>.pipe())
+            return UISearchBarDelegateProxy(textPipe: Signal<String?, NoError>.pipe() as! UISearchBar.Pipe, searchPipe: Signal<String?, NoError>.pipe() as! UISearchBar.Pipe)
         }
     }
     
