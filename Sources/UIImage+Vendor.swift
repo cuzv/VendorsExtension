@@ -162,7 +162,8 @@ public extension UIImageView {
     {
         guard let URLPath = URLPath, let URL = URL(string: URLPath) else { return }
         
-        kf.setImage(with: URL, placeholder: placeholderImage, options: [.transition(ImageTransition.fade(0.5))], progressBlock: progressBlock) { (image, error, cacheType, imageURL) -> () in
+        // options: [.transition(ImageTransition.fade(0.5))]
+        kf.setImage(with: URL, placeholder: placeholderImage, options: [], progressBlock: progressBlock) { (image, error, cacheType, imageURL) -> () in
             completionHandler?(image, error, imageURL)
         }
     }
