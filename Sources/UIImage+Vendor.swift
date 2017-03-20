@@ -27,6 +27,7 @@
 import UIKit
 import Kingfisher
 import Toucan
+import ExtensionKit
 
 public extension UIImage {
     /// Crop will resize to fit one dimension, then crop the other.
@@ -211,5 +212,32 @@ public extension UIButton {
     public func cancelDownloadImage() {
         kf.cancelImageDownloadTask()
         kf.cancelBackgroundImageDownloadTask()
+    }
+}
+
+
+// MARK: - 圆形头像
+public extension UIImageView {
+    public func setCircleImage(withUrlPath urlPath: String, placeholer: UIImage? = nil) {
+        image = placeholer
+        
+        guard let url = URL(string: urlPath) else { return }
+        
+        let maybeIndicator = kf.indicator
+        maybeIndicator?.startAnimatingView()
+        
+        KingfisherManager.shared.retrieveImage(with: url, options: nil, progressBlock: nil) { [weak self] (image: Image?, error: NSError?, type: CacheType, url: URL?) in
+            guard let image = image else {
+                maybeIndicator?.stopAnimatingView()
+                return
+            }
+            backgroundThreadAsync {
+                let newImage = image.circle
+                mainThreadAsync {
+                    self?.image = newImage
+                    maybeIndicator?.stopAnimatingView()
+                }
+            }
+        }
     }
 }
