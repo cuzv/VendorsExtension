@@ -458,86 +458,86 @@ extension RedesError {
 }
 
 
-private extension Redes.DataRequest {
-    var producer: SignalProducer <Any, NSError>  {
-        return SignalProducer { observer, disposable in
-            self.responseJSON { (resp: DataResponse<Any>) -> () in
-                switch resp.result {
-                case let .success(value):
-                    observer.send(value: value)
-                    observer.sendCompleted()
-                case let .failure(error):
-                    observer.send(error: error.nserror)
-                }
-            }
-            disposable.add {
-                self.cancel()
-            }
-        }
-    }
-    
-    var asyncProducer: SignalProducer <Any, NSError>  {
-        return SignalProducer { observer, disposable in
-            self.responseJSON(queue: DispatchQueue.global()) { (resp: DataResponse<Any>) -> () in
-                switch resp.result {
-                case let .success(value):
-                    observer.send(value: value)
-                    observer.sendCompleted()
-                case let .failure(error):
-                    observer.send(error: error.nserror)
-                }
-            }
-            disposable.add {
-                self.cancel()
-            }
-        }
-    }
-}
-
-private extension Redes.DownloadRequest {
-    var asyncProducer: SignalProducer <Any, NSError>  {
-        return SignalProducer { observer, disposable in
-            self.response(queue: DispatchQueue.global()) { (resp: DefaultDownloadResponse) in
-                if let destinationURL = resp.destinationURL, resp.error == nil {
-                    observer.send(value: destinationURL)
-                    observer.sendCompleted()
-                } else {
-                    observer.send(error: NSErrorFrom(message: resp.error!.localizedDescription))
-                }
-            }
-            disposable.add {
-                self.cancel()
-            }
-        }
-    }
-}
-
-public extension Redes.BatchRequest {
-    public var producer: SignalProducer<[Any], NSError> {
-        let producers = requests.map { (req: Requestable) -> SignalProducer<Any, NSError> in
-            return req.producer
-        }
-        return SignalProducer.combineLatest(producers)
-    }
-    
-    public var asyncProducer: SignalProducer<[Any], NSError> {
-        let producers = requests.map { (req: Requestable) -> SignalProducer<Any, NSError> in
-            return req.asyncProducer
-        }
-        return SignalProducer.combineLatest(producers)
-    }
-    
-    public var asyncDownloadProducer: SignalProducer<[URL], NSError> {
-        let producers = requests.map { (req: Requestable) -> SignalProducer<URL, NSError> in
-            if let req = req as? Downloadable {
-                return req.asyncProducer
-            }
-            return SignalProducer.empty
-        }
-        return SignalProducer.combineLatest(producers)
-    }
-}
-
+//private extension Redes.DataRequest {
+//    var producer: SignalProducer <Any, NSError>  {
+//        return SignalProducer { observer, disposable in
+//            self.responseJSON { (resp: DataResponse<Any>) -> () in
+//                switch resp.result {
+//                case let .success(value):
+//                    observer.send(value: value)
+//                    observer.sendCompleted()
+//                case let .failure(error):
+//                    observer.send(error: error.nserror)
+//                }
+//            }
+//            disposable.add {
+//                self.cancel()
+//            }
+//        }
+//    }
+//    
+//    var asyncProducer: SignalProducer <Any, NSError>  {
+//        return SignalProducer { observer, disposable in
+//            self.responseJSON(queue: DispatchQueue.global()) { (resp: DataResponse<Any>) -> () in
+//                switch resp.result {
+//                case let .success(value):
+//                    observer.send(value: value)
+//                    observer.sendCompleted()
+//                case let .failure(error):
+//                    observer.send(error: error.nserror)
+//                }
+//            }
+//            disposable.add {
+//                self.cancel()
+//            }
+//        }
+//    }
+//}
+//
+//private extension Redes.DownloadRequest {
+//    var asyncProducer: SignalProducer <Any, NSError>  {
+//        return SignalProducer { observer, disposable in
+//            self.response(queue: DispatchQueue.global()) { (resp: DefaultDownloadResponse) in
+//                if let destinationURL = resp.destinationURL, resp.error == nil {
+//                    observer.send(value: destinationURL)
+//                    observer.sendCompleted()
+//                } else {
+//                    observer.send(error: NSErrorFrom(message: resp.error!.localizedDescription))
+//                }
+//            }
+//            disposable.add {
+//                self.cancel()
+//            }
+//        }
+//    }
+//}
+//
+//public extension Redes.BatchRequest {
+//    public var producer: SignalProducer<[Any], NSError> {
+//        let producers = requests.map { (req: Requestable) -> SignalProducer<Any, NSError> in
+//            return req.producer
+//        }
+//        return SignalProducer.zip(producers)
+//    }
+//    
+//    public var asyncProducer: SignalProducer<[Any], NSError> {
+//        let producers = requests.map { (req: Requestable) -> SignalProducer<Any, NSError> in
+//            return req.asyncProducer
+//        }
+//        return SignalProducer.zip(producers)
+//    }
+//    
+//    public var asyncDownloadProducer: SignalProducer<[URL], NSError> {
+//        let producers = requests.map { (req: Requestable) -> SignalProducer<URL, NSError> in
+//            if let req = req as? Downloadable {
+//                return req.asyncProducer
+//            }
+//            return SignalProducer.empty
+//        }
+//        return SignalProducer.zip(producers)
+//    }
+//}
+//
 //public extension Redes.Requestable {
 //    public var asyncProducer: SignalProducer <Any, NSError>  {
 //        return makeRequest().resume().asyncProducer
@@ -547,12 +547,12 @@ public extension Redes.BatchRequest {
 //        return makeRequest().resume().asyncProducer
 //    }
 //}
-
-public extension Redes.Downloadable {
-    public var asyncProducer: SignalProducer <URL, NSError> {
-        return makeRequest().resume().asyncProducer.map { $0 as! URL }
-    }
-}
+//
+//public extension Redes.Downloadable {
+//    public var asyncProducer: SignalProducer <URL, NSError> {
+//        return makeRequest().resume().asyncProducer.map { $0 as! URL }
+//    }
+//}
 
 
 
