@@ -219,8 +219,10 @@ public extension UIButton {
 // MARK: - 圆形头像
 public extension UIImageView {
     public func setCircleImage(withUrlPath urlPath: String, placeholer: UIImage? = nil) {
-        image = placeholer
-        
+        if nil == image && nil == layer.contents {
+            image = placeholer
+        }
+
         guard let url = URL(string: urlPath) else { return }
         
         let maybeIndicator = kf.indicator
