@@ -215,29 +215,23 @@ public extension UIButton {
     }
 }
 
-
 // MARK: - 圆形头像
 public extension UIImageView {
     public func setCircleImage(withUrlPath urlPath: String, placeholer: UIImage? = nil) {
-        if nil == image && nil == layer.contents {
-            image = placeholer
+        if let cachedImage = ImageCache.default.retrieveImageInDiskCache(forKey: urlPath) {
+            image = cachedImage
+            return
         }
-
+        
+        image = placeholer
         guard let url = URL(string: urlPath) else { return }
-        
-        let maybeIndicator = kf.indicator
-        maybeIndicator?.startAnimatingView()
-        
         KingfisherManager.shared.retrieveImage(with: url, options: nil, progressBlock: nil) { [weak self] (image: Image?, error: NSError?, type: CacheType, url: URL?) in
-            guard let image = image else {
-                maybeIndicator?.stopAnimatingView()
-                return
-            }
             backgroundThreadAsync {
-                let newImage = image.circle
-                mainThreadAsync {
-                    self?.image = newImage
-                    maybeIndicator?.stopAnimatingView()
+                if let newImage = image?.circle {
+                    mainThreadAsync {
+                        self?.image = newImage
+                        ImageCache.default.store(newImage, forKey: urlPath)
+                    }
                 }
             }
         }
