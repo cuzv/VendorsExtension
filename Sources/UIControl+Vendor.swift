@@ -44,7 +44,9 @@ final public class SegmentedToggleControl: UIControl {
 
     public var selectedSegmentIndex: Int = 0 {
         didSet {
-            selectedSegmentIndex = selectedSegmentIndex >= items.count ? items.count - 1 : selectedSegmentIndex
+            if selectedSegmentIndex >= items.count {
+                selectedSegmentIndex = items.count - 1
+            }
             rac_index.value = selectedSegmentIndex
             updateAppearance()
         }
@@ -93,7 +95,11 @@ final public class SegmentedToggleControl: UIControl {
         if let font = font {
             var size = str.layoutSize(font: font)
             size.width += CGFloat(items.count * 12)
-            size.height = size.height >= 44 ? size.height : 44
+            var height = size.height
+            if height < 44 {
+                height = 44
+            }
+            size.height = height
             return size
         } else {
             return CGSize(width: 60, height: 44)
