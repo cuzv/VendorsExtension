@@ -396,47 +396,14 @@ public extension UIButton {
     }
 }
 
+// Will crash.
 extension UISearchBar {
     var rac_text: MutableProperty<String?> {
-        return lazyAssociatedProperty(host: self, key: &AssociationKey.text) {
-            self.delegate = self.delegateProxy
-            let property = MutableProperty<String?>(self.text)
-            property <~ self.delegateProxy.textPipe.signal
-            return property
-        }
+        return SignalProducer(reactive.continuousTextValues).rac_values(text)
     }
-    
+
     var rac_search: MutableProperty<String?> {
-        return lazyAssociatedProperty(host: self, key: &AssociationKey.search) {
-            self.delegate = self.delegateProxy
-            let property = MutableProperty<String?>(self.text)
-            property <~ self.delegateProxy.searchPipe.signal
-            return property
-        }
-    }
-    
-    private var delegateProxy: UISearchBarDelegateProxy {
-        return lazyAssociatedProperty(host: self, key: &AssociationKey.delegate) {
-            return UISearchBarDelegateProxy(textPipe: Signal<String?, NoError>.pipe() as! UISearchBar.Pipe, searchPipe: Signal<String?, NoError>.pipe() as! UISearchBar.Pipe)
-        }
-    }
-    
-    typealias Pipe = (signal: Signal<String?, NoError>, observer: Observer<String?, NoError>)
-    private class UISearchBarDelegateProxy: NSObject, UISearchBarDelegate {
-        let textPipe: Pipe
-        let searchPipe: Pipe
-        init(textPipe: Pipe, searchPipe: Pipe) {
-            self.textPipe = textPipe
-            self.searchPipe = searchPipe
-        }
-        
-        @objc func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-            textPipe.observer.send(value: searchBar.text)
-        }
-        
-        @objc func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-            searchPipe.observer.send(value: searchBar.text)
-        }
+        return SignalProducer(reactive.textValues).rac_values(text)
     }
 }
 
